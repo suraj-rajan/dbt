@@ -126,6 +126,62 @@ class GraphSelectionTest(BaseGraphSelectionTest):
             set(['m.X.a', 'm.X.c', 'm.Y.f', 'm.X.g'])
         )
 
+    def test__select_intersection_same_model(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['X.a,X.a'],
+            [],
+            set(['m.X.a'])
+        )
+
+    def test__select_intersection_parents_childrens(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['+X.b,m.b+'],
+            [],
+            set(['m.X.b'])
+        )
+
+    def test__select_intersection_empty(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['X.a,X.b'],
+            [],
+            set()
+        )
+
+    def test__select_intersection_empty(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['X.a,X.b'],
+            [],
+            set()
+        )
+
+    def test__select_intersection_triple(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['+X.b,X.b,X.b+'],
+            [],
+            set(['m.X.b'])
+        )
+
+    def test__select_intersection_exclude(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['tag:abc,X.a+'],
+            ['X.c'],
+            set(['m.X.a', 'm.X.b'])
+        )
+
+    def test__select_intersection_exclude_intersection(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['tag:abc,X.a+'],
+            ['*,X.c'],
+            set(['m.X.a', 'm.X.b'])
+        )
+
     def parse_spec_and_assert(self, spec, parents, children, filter_type, filter_value, childrens_parents):
         parsed = graph_selector.SelectionCriteria(spec)
         self.assertEqual(parsed.select_parents, parents)
