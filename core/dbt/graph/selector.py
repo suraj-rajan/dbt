@@ -72,7 +72,6 @@ class SelectionCriteria:
 
 
 def split_intersection_blocks(spec):
-    print(spec.split(INTERSECTION_DELIMITER))
     return spec.split(INTERSECTION_DELIMITER)
 
 
@@ -396,11 +395,6 @@ class NodeSelector(MultiSelector):
         return collected
 
     def get_nodes_from_intersection_spec(self, graph, raw_spec):
-        w = set.intersection(
-            *[self.get_nodes_from_spec(graph, SelectionCriteria(
-                intersection_block_spec)) for intersection_block_spec in
-              split_intersection_blocks(raw_spec)]
-        )
         return set.intersection(
             *[self.get_nodes_from_spec(graph, SelectionCriteria(
                 intersection_block_spec)) for intersection_block_spec in
@@ -419,7 +413,6 @@ class NodeSelector(MultiSelector):
         operator = set.difference_update if exclude else set.update
 
         for raw_spec in split_specs(specs):
-            print(raw_spec)
             nodes = self.get_nodes_from_intersection_spec(graph, raw_spec)
 
             if check_existence:
