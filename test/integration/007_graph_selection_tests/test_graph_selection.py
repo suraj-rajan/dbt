@@ -214,7 +214,7 @@ class TestGraphSelection(DBTIntegrationTest):
     def test__postgres__more_childrens_parents(self):
         self.run_sql_file("seed.sql")
         results = self.run_dbt(['run', '--models', '@users'])
-        # base_users, emails, users_rollup, users_rollup_dependency, but not users (ephemeral)
+        # users, emails_alt, users_rollup, users_rollup_dependency, but not base_users (ephemeral)
         self.assertEqual(len(results), 4)
 
         created_models = self.get_models_in_schema()
@@ -248,9 +248,9 @@ class TestGraphSelection(DBTIntegrationTest):
     @use_profile('postgres')
     def test__postgres__concat(self):
         self.run_sql_file("seed.sql")
-        results = self.run_dbt(['run', '--models', '@users', '@emails'])
-        # base_users, emails, users_rollup, users_rollup_dependency, but not users (ephemeral)
-        self.assertEqual(len(results), 5)
+        results = self.run_dbt(['run', '--models', '@emails_alt', 'users_rollup'])
+        # users, emails_alt, users_rollup
+        self.assertEqual(len(results), 3)
 
         created_models = self.get_models_in_schema()
         self.assertIn('users_rollup', created_models)
@@ -262,14 +262,14 @@ class TestGraphSelection(DBTIntegrationTest):
     @use_profile('postgres')
     def test__postgres__concat_exclude(self):
         self.run_sql_file("seed.sql")
-        results = self.run_dbt(['run', '--models', '@users', '@emails', '--exclude', 'users_rollup'])
-        # base_users, emails, users_rollup, users_rollup_dependency, but not users (ephemeral)
-        self.assertEqual(len(results), 5)
+        results = self.run_dbt(['run', '--models', '@emails_alt', 'users_rollup', '--exclude', 'users'])
+        # emails_alt, users_rollup
+        self.assertEqual(len(results), 2)
 
         created_models = self.get_models_in_schema()
         self.assertIn('users_rollup', created_models)
-        self.assertIn('users', created_models)
         self.assertIn('emails_alt', created_models)
+        self.assertNotIn('users', created_models)
         self.assertNotIn('subdir', created_models)
         self.assertNotIn('nested_users', created_models)
 
@@ -277,14 +277,15 @@ class TestGraphSelection(DBTIntegrationTest):
     def test__postgres__concat_exclude_concat(self):
         self.run_sql_file("seed.sql")
         results = self.run_dbt(
-            ['run', '--models', '@users', '@emails', '--exclude',
-             'users_rollup', 'base_users'])
-        # base_users, emails, users_rollup, users_rollup_dependency, but not users (ephemeral)
-        self.assertEqual(len(results), 5)
+            ['run', '--models', '@emails_alt', 'users_rollup', '--exclude', 'users', 'users_rollup']
+        )
+        # emails_alt
+        self.assertEqual(len(results), 1)
 
         created_models = self.get_models_in_schema()
-        self.assertIn('users_rollup', created_models)
-        self.assertIn('users', created_models)
+
         self.assertIn('emails_alt', created_models)
+        self.assertNotIn('users', created_models)
+        self.assertNotIn('users_rollup', created_models)
         self.assertNotIn('subdir', created_models)
         self.assertNotIn('nested_users', created_models)
