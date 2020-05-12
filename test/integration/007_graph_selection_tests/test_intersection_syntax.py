@@ -168,7 +168,22 @@ class TestGraphSelection(DBTIntegrationTest):
 
         results = self.run_dbt(
             ['run', '--models', 'tag:bi,@users', '@base_models,tag:base',
-             '--exclude', '@users'])
+             '--exclude', '@users', '@tag:bi'])
+        self.assertEqual(len(results), 1)
+
+        self.assertTablesEqual("seed", "users")
+        created_models = self.get_models_in_schema()
+        self.assertFalse('users_rollup' in created_models)
+        self.assertFalse('base_users' in created_models)
+        self.assertFalse('emails' in created_models)
+
+    @use_profile('postgres')
+    def test__postgres__intersection_concat_exclude_intersection_concat(self):
+        self.run_sql_file("seed.sql")
+
+        results = self.run_dbt(
+            ['run', '--models', 'tag:bi,@users', '@base_models,tag:base',
+             '--exclude', '@users,users', '@users,base_models'])
         self.assertEqual(len(results), 1)
 
         self.assertTablesEqual("seed", "users")
