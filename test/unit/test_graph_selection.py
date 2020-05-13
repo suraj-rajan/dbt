@@ -125,6 +125,30 @@ class GraphSelectionTest(BaseGraphSelectionTest):
             set(['m.X.a', 'm.X.c', 'm.Y.f', 'm.X.g'])
         )
 
+    def test__select_concat(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['tag:abc', 'tag:bcef'],
+            [],
+            set(['m.X.a', 'm.Y.b', 'm.X.c', 'm.X.e', 'm.Y.f'])
+        )
+
+    def test__select_concat_exclude(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['tag:abc', 'tag:bcef'],
+            ['tag:efg'],
+            set(['m.X.a', 'm.Y.b', 'm.X.c'])
+        )
+
+    def test__select_concat_exclude_concat(self):
+        self.run_specs_and_assert(
+            self.package_graph,
+            ['tag:abc', 'tag:bcef'],
+            ['tag:efg', 'a'],
+            set(['m.Y.b', 'm.X.c'])
+        )
+
     def test__select_same_model_intersection(self):
         self.run_specs_and_assert(
             self.package_graph,
