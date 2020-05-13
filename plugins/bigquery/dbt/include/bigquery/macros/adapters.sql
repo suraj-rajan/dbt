@@ -65,17 +65,16 @@
 
   create or replace view {{ relation }}
   {{ bigquery_table_options(config, model, temporary=false) }}
-  as (
-    {{ sql }}
-  );
+  as {{ sql }};
+
 {% endmacro %}
 
 {% macro bigquery__create_schema(database_name, schema_name) -%}
   {{ adapter.create_schema(database_name, schema_name) }}
 {% endmacro %}
 
-{% macro bigquery__drop_schema(database_name, schema_name) -%}
-  {{ adapter.drop_schema(database_name, schema_name) }}
+{% macro bigquery__drop_schema(relation) -%}
+  {{ adapter.drop_schema(relation) }}
 {% endmacro %}
 
 {% macro bigquery__drop_relation(relation) -%}
@@ -89,8 +88,8 @@
 {% endmacro %}
 
 
-{% macro bigquery__list_relations_without_caching(information_schema, schema) -%}
-  {{ return(adapter.list_relations_without_caching(information_schema, schema)) }}
+{% macro bigquery__list_relations_without_caching(schema_relation) -%}
+  {{ return(adapter.list_relations_without_caching(schema_relation)) }}
 {%- endmacro %}
 
 
